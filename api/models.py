@@ -134,7 +134,8 @@ class Wallet(models.Model):
     def send_money(self, receiver, amount, description=None):
         if float(self.balance)<float(amount):
             return ValueError('Insufficient balance')
-        
+        if receiver is self:
+            return ValueError('Operation invalid')
         self.balance=float(self.balance)-float(amount)
         self.save()
         receiver.balance=float(amount)+float(self.balance)
