@@ -150,12 +150,15 @@ class Wallet(models.Model):
         transaction.save()
 
         # beneficiary, created=Beneficiary.objects.get_or_create(user=self.user, beneficiaries=receiver)
-        if not Beneficiary.objects.filter(user=self.user, beneficiaries=receiver).exists():
+        if not Beneficiary.objects.filter(user=self.user).exists():
             beneficiary=Beneficiary(user=self.user)
             beneficiary.save()
-            beneficiary.beneficiaries.set(receiver)
-        else:
-            Beneficiary.objects.get(user=self.user).beneficiaries.set(receiver)
+            beneficiary.beneficiaries.add(receiver.id)
+        elif not Beneficiary.objects.filter(user=self.user, beneficiaries=receiver).exists():
+            Beneficiary.objects.get(user=self.user).beneficiaries.add(receiver.id)
+        
+            
+            
 
     
         return transaction
