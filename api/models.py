@@ -115,7 +115,7 @@ class Wallet(models.Model):
             self.num=self.generate_account(self)
         if not self.card:
             self.card=self.generate_card(self)
-            self.pin=self.set_password('000')
+            self.pin=self.set_password('0000')
         super().save(*args, **kwargs)
 
     def generate_account(self):
@@ -181,6 +181,6 @@ class Beneficiary(models.Model):
 class Transaction(models.Model):
     initiator=models.ForeignKey(Wallet, on_delete=models.PROTECT)
     amount=models.DecimalField(max_digits=20, decimal_places=3)
-    reciever=models.ForeignKey(Wallet, related_name='transactions', on_delete=models.PROTECT)
+    receiver=models.ForeignKey(Wallet, related_name='transactions', on_delete=models.PROTECT)
     description=models.CharField(max_length=100)
     time=models.DateTimeField('Time initiated', auto_now_add=True, blank=True)
