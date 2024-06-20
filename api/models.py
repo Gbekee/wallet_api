@@ -72,6 +72,7 @@ class User(AbstractBaseUser):
         x.user=self
         x.pin=make_password('0000')
         x.save(*args, **kwargs)
+        return x
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -131,10 +132,13 @@ class Wallet(models.Model):
                 return card_number
 
 
-    def send_money(self, receiver, amount, description=None):
+    def send_money(self, account_num, amount, description=None):
+        if not Wallet.objects.filter(num=account_num).exists():
+            return ValueError('User does not exists')
+        receiver=Wallet.objects.get(num=account_num)
         if float(self.balance)<float(amount):
             return ValueError('Insufficient balance')
-        if receiver is self:
+        if receiver == self:
             return ValueError('Operation invalid')
         self.balance=float(self.balance)-float(amount)
         self.save()
