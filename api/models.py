@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 import random
 from django.contrib.auth.hashers import make_password, check_password
 # Create your models here.
+from django.utils import timezone
 class UserManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, phone,password):
         if not email:
@@ -142,7 +143,7 @@ class Wallet(models.Model):
             return ValueError('Operation invalid')
         self.balance=float(self.balance)-float(amount)
         self.save()
-        receiver.balance=float(amount)+float(self.balance)
+        receiver.balance=float(amount)+float(receiver.balance)
         receiver.save()
 
         description=description
@@ -171,7 +172,8 @@ class Wallet(models.Model):
         return f'{self.user} wallet: {self.id}'
     
 class Beneficiary(models.Model):
-    user=models.OneToOneField(User, on_delete=models.CASCADE)
+    # pass
+    user=models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     beneficiaries = models.ManyToManyField(Wallet, related_name='beneficiaries')
     favourite = models.BooleanField(default=False)
     bank = models.BooleanField(default=False)
@@ -183,4 +185,4 @@ class Transaction(models.Model):
     amount=models.DecimalField(max_digits=20, decimal_places=3)
     receiver=models.ForeignKey(Wallet, related_name='credits', on_delete=models.PROTECT)
     description=models.CharField(max_length=100)
-    time=models.DateTimeField('Time initiated', auto_now_add=True, blank=True)
+    time=models.DateTimeField('Time initiated', default=timezone.now, blank=True)
