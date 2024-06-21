@@ -148,7 +148,7 @@ class Wallet(models.Model):
         description=description
         transaction=Transaction()
         transaction.initiator=self
-        transaction.reciever=receiver
+        transaction.receiver=receiver
         transaction.description=description
         transaction.amount=amount
         transaction.save()
@@ -179,8 +179,8 @@ class Beneficiary(models.Model):
 
 
 class Transaction(models.Model):
-    initiator=models.ForeignKey(Wallet, on_delete=models.PROTECT)
+    initiator=models.ForeignKey(Wallet, on_delete=models.PROTECT, related_name='debits')
     amount=models.DecimalField(max_digits=20, decimal_places=3)
-    receiver=models.ForeignKey(Wallet, related_name='transactions', on_delete=models.PROTECT)
+    receiver=models.ForeignKey(Wallet, related_name='credits', on_delete=models.PROTECT)
     description=models.CharField(max_length=100)
     time=models.DateTimeField('Time initiated', auto_now_add=True, blank=True)
