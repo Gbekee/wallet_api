@@ -7,6 +7,12 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Transaction
         fields='__all__'
+        extra_kwargs={
+            'time':{'read_only':True}
+        }
+    def create(self, validated_data):
+        validated_data['initiator'].send_money(validated_data['receiver'].num, validated_data['amount'], validated_data['description'])
+        return Transaction.objects.create(**validated_data)
 
 class BeneficiarySerializer(serializers.ModelSerializer):
     user=serializers.PrimaryKeyRelatedField(read_only=True)
@@ -38,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         
         model=User
-        fields=['first_name', 'last_name', 'email', 'wallets', 'name']
+        fields=['first_name', 'last_name','name', 'email', 'phone','wallets',  'password']
         # fields='__all__'
         extra_kwargs={
             'first_name':{'write_only' : True},

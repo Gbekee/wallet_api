@@ -12,11 +12,12 @@ class UserDetailViewSet(generics.RetrieveUpdateDestroyAPIView):
     queryset=User.objects.all()
     serializer_class=UserSerializer
 
-class TransactionsViewSet(generics.ListAPIView):
+class TransactionsViewSet(generics.ListCreateAPIView):
     queryset=Transaction.objects.all()
     serializer_class=TransactionSerializer
 
-class WalletsViewSet(generics.ListAPIView):
+
+class WalletsViewSet(generics.ListCreateAPIView):
     queryset=Wallet.objects.all()
     serializer_class=WalletSerializer
 
