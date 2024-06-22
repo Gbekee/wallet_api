@@ -21,7 +21,7 @@ class WalletsViewSet(generics.ListCreateAPIView):
     queryset=Wallet.objects.all()
     serializer_class=WalletSerializer
 
-class WalletDetailViewSet(generics.ListAPIView):
+class WalletDetailViewSet(generics.RetrieveUpdateDestroyAPIView):
     queryset=Wallet.objects.all()
     serializer_class=WalletSerializer
 

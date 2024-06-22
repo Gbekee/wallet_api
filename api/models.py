@@ -6,6 +6,28 @@ import random
 from django.contrib.auth.hashers import make_password, check_password
 # Create your models here.
 from django.utils import timezone
+class WalletManager(models.Manager):
+    def create(self, **kwargs):
+        print(kwargs)
+        if 'pin' not in kwargs:
+            kwargs['pin']=make_password('0000')
+        else:
+            kwargs['pin']=make_password(kwargs['pin'])
+        if 'user' not in kwargs:
+            return ValueError('User expected')
+        while True:
+            account_number='1'+''.join(str(random.randint(0,9)) for i in range(9))
+            account_number=int(account_number)
+            card_number='2'+''.join(str(random.randint(0,9)) for i in range(15))
+            card_number=int(card_number)
+            if not Wallet.objects.filter(num=account_number).exists() and not Wallet.objects.filter(card=card_number).exists():
+                kwargs['num']=account_number
+                kwargs['card']=card_number
+                print(kwargs)
+                instance=self.model(**kwargs)
+                instance.save()
+                return instance
+        
 class UserManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, phone,password):
         if not email:
@@ -65,25 +87,10 @@ class User(AbstractBaseUser):
     
     def has_module_perms(self, api_label):
         return True
-    def add_wallet(self,*args, **kwargs):
-       
-        x=Wallet()
-        x.num=x.generate_account()
-        x.card=x.generate_card()
-        x.user=self
-        x.pin=make_password('0000')
-        x.save(*args, **kwargs)
-        return x
-
     def save(self, *args, **kwargs):
         if not self.pk:
             super().save(*args, **kwargs)
-            x=Wallet()
-            x.num=x.generate_account()
-            x.card=x.generate_card()
-            x.user=self
-            x.pin=make_password('0000')
-            x.save(*args, **kwargs)
+            Wallet.objects.create(user=self)
         else:
             super().save(*args, **kwargs)
     
@@ -105,19 +112,24 @@ class User(AbstractBaseUser):
         return self.first_name
     
 class Wallet(models.Model):
-    num=models.IntegerField(verbose_name='Account number', unique=True)
+    num=models.BigIntegerField(verbose_name='Account number', unique=True)
     balance=models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
     pin=models.CharField(max_length=255)
-    card=models.IntegerField(verbose_name='Card number', unique=True)
+    card=models.BigIntegerField(verbose_name='Card number', unique=True)
     user=models.ForeignKey(User,  on_delete=models.CASCADE, related_name='wallets')
+    objects=WalletManager()
     
-    def save(self, *args, **kwargs):
-        if not self.num:
-            self.num=self.generate_account(self)
-        if not self.card:
-            self.card=self.generate_card(self)
-            self.pin=self.set_password('0000')
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     print(args)
+    #     print()
+    #     print(kwargs)
+    #     if not 'num' in kwargs:
+    #         x=Wallet.objects.create(user=kwargs['user'], pin=kwargs['pin'])
+    #         return x
+    #     # if not self.card:
+    #     #     self.card=self.generate_card()
+    #     #     self.pin=make_password('0000')
+    #     super().save(*args, **kwargs)
 
     def generate_account(self):
         while True:

@@ -1,18 +1,24 @@
 from rest_framework import serializers
 from .models import User, Beneficiary, Transaction, Wallet
 
+
 class TransactionSerializer(serializers.ModelSerializer):
     receiver=serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
     initiator=serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
+    time_initiated=serializers.SerializerMethodField()
     class Meta:
         model=Transaction
-        fields='__all__'
+        fields=['initiator', 'receiver', 'amount', 'description', 'time_initiated']
         extra_kwargs={
             'time':{'read_only':True}
         }
     def create(self, validated_data):
+        if validated_data['initiator']==validated_data['receiver']:
+            return 
         validated_data['initiator'].send_money(validated_data['receiver'].num, validated_data['amount'], validated_data['description'])
         return Transaction.objects.create(**validated_data)
+    def get_time_initiated(self, obj):
+        return obj.time.strftime('%H:%M:%S %D')
 
 class BeneficiarySerializer(serializers.ModelSerializer):
     user=serializers.PrimaryKeyRelatedField(read_only=True)
@@ -22,12 +28,12 @@ class BeneficiarySerializer(serializers.ModelSerializer):
         fields=['user','beneficiaries', 'favourite', 'bank', 'e_wallet']
 
 class WalletSerializer(serializers.ModelSerializer):
-    user=serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    debits=TransactionSerializer(many=True)
-    credits=TransactionSerializer(many=True)
+    user=serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), read_only=True)
+    debits=TransactionSerializer(many=True, read_only=True)
+    credits=TransactionSerializer(many=True, read_only=True)
     class Meta:
         model=Wallet
-        fields=['num', 'balance', 'pin', 'card', 'user', 'debits', 'credits']
+        fields=['num', 'balance', 'pin', 'card', 'user', 'credits', 'debits']
         extra_kwargs={
             'num':{'read_only' : True},
             'balance':{'read_only' : True},
@@ -35,6 +41,7 @@ class WalletSerializer(serializers.ModelSerializer):
             'credits':{'read_only' : True},
             'debits':{'read_only' : True},
             'pin':{'write_only' : True}
+            # 'user':{'read_only' : True}
         }
         
 class UserSerializer(serializers.ModelSerializer):
