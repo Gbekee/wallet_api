@@ -76,7 +76,6 @@ class User(AbstractBaseUser):
     is_admin=models.BooleanField(default=False)
     is_staff=models.BooleanField(default=False)
     is_superadmin=models.BooleanField(default=False)
-
     objects=UserManager()
 
     USERNAME_FIELD='email'
@@ -117,6 +116,7 @@ class Wallet(models.Model):
     pin=models.CharField(max_length=255)
     card=models.BigIntegerField(verbose_name='Card number', unique=True)
     user=models.ForeignKey(User,  on_delete=models.CASCADE, related_name='wallets')
+    bank=models.CharField(default='World Bank', max_length=50)
     objects=WalletManager()
     
     # def save(self, *args, **kwargs):
@@ -184,12 +184,11 @@ class Wallet(models.Model):
         return f'{self.user} wallet: {self.id}'
     
 class Beneficiary(models.Model):
-    # pass
     user=models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     beneficiaries = models.ManyToManyField(Wallet, related_name='beneficiaries')
-    favourite = models.BooleanField(default=False)
-    bank = models.BooleanField(default=False)
-    e_wallet = models.BooleanField(default=False)
+    favorites = models.ManyToManyField(Wallet, related_name='favorites')
+    banks =  models.ManyToManyField(Wallet, related_name='banks')
+    e_wallets =  models.ManyToManyField(Wallet, related_name='e_wallets')
 
 
 class Transaction(models.Model):

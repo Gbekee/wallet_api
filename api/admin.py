@@ -11,7 +11,7 @@ class TransactionAdmin(admin.ModelAdmin):
     readonly_fields = ('initiator', 'amount', 'receiver', 'description', 'time')
 
 class BeneficaryAdmin(admin.ModelAdmin):
-    readonly_fields=('user', 'bank', 'beneficiaries', 'e_wallet', 'favourite')
+    readonly_fields=('user', 'banks', 'beneficiaries', 'e_wallets', 'favorites')
 admin.site.register(User, UserAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Beneficiary, BeneficaryAdmin)

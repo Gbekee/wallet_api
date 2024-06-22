@@ -9,5 +9,5 @@ urlpatterns=[
     path('api/wallets', views.WalletsViewSet.as_view(), name='users'),
     path('api/wallets/<int:pk>', views.WalletDetailViewSet.as_view(), name='users'),
     path('api/beneficiaries', views.BeneficiariesViewSet.as_view(), name='users'),
-    path('api/benefies/<int:pk>', views.BeneficiaryDetailViewSet.as_view(), name='users')
+    path('api/beneficiaries/<int:pk>', views.BeneficiaryDetailViewSet.as_view(), name='users')
 ]

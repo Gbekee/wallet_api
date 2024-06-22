@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, Beneficiary, Transaction, Wallet
-
+from rest_framework.response import Response
 
 class TransactionSerializer(serializers.ModelSerializer):
     receiver=serializers.PrimaryKeyRelatedField(queryset=Wallet.objects.all())
@@ -13,35 +13,38 @@ class TransactionSerializer(serializers.ModelSerializer):
             'time':{'read_only':True}
         }
     def create(self, validated_data):
-        if validated_data['initiator']==validated_data['receiver']:
-            return 
-        validated_data['initiator'].send_money(validated_data['receiver'].num, validated_data['amount'], validated_data['description'])
-        return Transaction.objects.create(**validated_data)
+        if validated_data['initiator']==validated_data['receiver'] or float(validated_data['amount'])>float(validated_data['receiver'].balance):
+            print('\nInvalid\n')
+            raise ValueError({ 
+                    'error': ['Invalid Operation']
+                })
+        
+        return validated_data['initiator'].send_money(validated_data['receiver'].num, validated_data['amount'], validated_data['description'])
     def get_time_initiated(self, obj):
         return obj.time.strftime('%H:%M:%S %D')
 
 class BeneficiarySerializer(serializers.ModelSerializer):
     user=serializers.PrimaryKeyRelatedField(read_only=True)
-    beneficiaries=serializers.PrimaryKeyRelatedField(read_only=True)
+    beneficiaries=serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     class Meta:
         model=Beneficiary
-        fields=['user','beneficiaries', 'favourite', 'bank', 'e_wallet']
+        fields=['user','beneficiaries', 'favorites', 'banks', 'e_wallets']
 
 class WalletSerializer(serializers.ModelSerializer):
-    user=serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), read_only=True)
     debits=TransactionSerializer(many=True, read_only=True)
     credits=TransactionSerializer(many=True, read_only=True)
     class Meta:
         model=Wallet
-        fields=['num', 'balance', 'pin', 'card', 'user', 'credits', 'debits']
+        fields=['id', 'bank', 'num', 'balance', 'pin', 'card', 'user', 'credits', 'debits']
         extra_kwargs={
             'num':{'read_only' : True},
             'balance':{'read_only' : True},
             'card':{'read_only' : True},
             'credits':{'read_only' : True},
             'debits':{'read_only' : True},
-            'pin':{'write_only' : True}
-            # 'user':{'read_only' : True}
+            'pin':{'write_only' : True},
+            'user':{'read_only' : True},
+            'bank':{'read_only' : True}
         }
         
 class UserSerializer(serializers.ModelSerializer):
@@ -51,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         
         model=User
-        fields=['first_name', 'last_name','name', 'email', 'phone','wallets',  'password']
+        fields=['id','first_name', 'last_name','name', 'email', 'phone','wallets',  'password']
         # fields='__all__'
         extra_kwargs={
             'first_name':{'write_only' : True},

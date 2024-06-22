@@ -29,10 +29,10 @@ class TransactionDetailViewSet(generics.ListAPIView):
     queryset=Transaction.objects.all()
     serializer_class=TransactionSerializer
 
-class BeneficiariesViewSet(generics.ListCreateAPIView):
+class BeneficiariesViewSet(generics.ListAPIView):
     queryset=Beneficiary.objects.all()
     serializer_class=BeneficiarySerializer
 
-class BeneficiaryDetailViewSet(generics.ListAPIView):
+class BeneficiaryDetailViewSet(generics.RetrieveUpdateDestroyAPIView):
     queryset=Beneficiary.objects.all()
     serializer_class=BeneficiarySerializer
