@@ -69,7 +69,6 @@ class User(AbstractBaseUser):
     first_name=models.CharField(verbose_name='First name', max_length=50)
     last_name=models.CharField(verbose_name='Last name', max_length=50)
     email=models.EmailField(unique=True)
-    # password=models.CharField(max_length=255)
     address=models.TextField()
     phone=models.IntegerField(verbose_name='Phone number')
     is_active=models.BooleanField(default=False)
@@ -118,18 +117,6 @@ class Wallet(models.Model):
     user=models.ForeignKey(User,  on_delete=models.CASCADE, related_name='wallets')
     bank=models.CharField(default='World Bank', max_length=50)
     objects=WalletManager()
-    
-    # def save(self, *args, **kwargs):
-    #     print(args)
-    #     print()
-    #     print(kwargs)
-    #     if not 'num' in kwargs:
-    #         x=Wallet.objects.create(user=kwargs['user'], pin=kwargs['pin'])
-    #         return x
-    #     # if not self.card:
-    #     #     self.card=self.generate_card()
-    #     #     self.pin=make_password('0000')
-    #     super().save(*args, **kwargs)
 
     def generate_account(self):
         while True:
@@ -166,18 +153,13 @@ class Wallet(models.Model):
         transaction.amount=amount
         transaction.save()
 
-        # beneficiary, created=Beneficiary.objects.get_or_create(user=self.user, beneficiaries=receiver)
         if not Beneficiary.objects.filter(user=self.user).exists():
             beneficiary=Beneficiary(user=self.user)
             beneficiary.save()
             beneficiary.beneficiaries.add(receiver.id)
         elif not Beneficiary.objects.filter(user=self.user, beneficiaries=receiver).exists():
             Beneficiary.objects.get(user=self.user).beneficiaries.add(receiver.id)
-        
-            
-            
-
-    
+ 
         return transaction
     
     def __str__(self):

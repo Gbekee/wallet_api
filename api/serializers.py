@@ -55,11 +55,9 @@ class UserSerializer(serializers.ModelSerializer):
         
         model=User
         fields=['id','first_name', 'last_name','name', 'email', 'phone','wallets',  'password']
-        # fields='__all__'
         extra_kwargs={
             'first_name':{'write_only' : True},
             'last_name':{'write_only' : True},
-            # 'wallets': {'read_only' : True}, 
             'password':{'write_only':True}
 
         }
